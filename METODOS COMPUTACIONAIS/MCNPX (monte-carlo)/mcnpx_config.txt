@@ -1,0 +1,12 @@
+# para cada pasta de trabalho de simulações mcnpx
+# criar os links simbolicos (necessários para a execução do codigo):
+
+ln -s /usr/local/lib/bertin bertin
+ln -s /usr/local/lib/phtlib phtlib
+ln -s /usr/local/lib/barpol.dat barpol.dat
+
+#Se por algum motivo o mcnpx se queixar da falta de ficheiros, correr na pasta de trabalho, uma única vez 
+
+# ln -s /opt/mcnpxdata/xsdir xsdir1 
+# ln -s /opt/mcnpxdata/mcplib mcplib
+# ln -s /opt/mcnpxdata/mcplib02 mcplib02
