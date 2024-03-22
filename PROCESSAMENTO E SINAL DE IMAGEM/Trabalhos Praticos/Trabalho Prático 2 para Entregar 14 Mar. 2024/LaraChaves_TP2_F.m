@@ -4,29 +4,28 @@
 % Segmentação por Thresholding Global
 
 function LaraChaves_TP2_F(imagem)
-% carregando imagem
-img = imread(imagem);
 
-% converter para escala de cinza
-if size(img, 3) == 3
-        imgCinza = rgb2gray(img);
-    else
-        imgCinza = img;
-    end
-% imagem e histograma imgCinza
-subplot(2,2,1), imshow(imgCinza), title('Imagem escala Cinza');
-subplot(2,2,2), imhist(imgCinza), title('Histograma imagem escala de Cinza');
+IM=imread(imagem);
+[NL,NC,NB]=size(IM)
+IC=IM;
 
-% Tresholding Global usando o método de Otsu
-nivelOtsu = graythresh(imgCinza);
-IBO = imbinarize(imgCinza, nivelOtsu);  
- subplot(2, 2, 3), imshow(IBO), title(['IBO - Tg:Otsu = ' num2str(uint8(nivelOtsu * 255))]);
+if NB==3 %caso IM seja uma imagem de cor, converte para tons de cinzento
+    IC=rgb2gray(IM);
+end
+subplot(2,2,1), imshow(IC), title("tons de cinzento")
+subplot(2,2,2), imhist(IC), title("histograma IC")
 
-% Tresholding Global usando o valor da mediana de IC
- nivelMediana = median(imgCinza(:)) / 255;
- IBM = imbinarize(imgCinza, nivelMediana);
- subplot(2, 2, 4), imshow(IBM), title(['IBM - Tg:Mediana = ' num2str(uint8(nivelMediana * 255))]);
+%segmentação pelo metod Otsu
+TOtsu = graythresh(IC); %calcula o valor T mas numa escala de 0-1
+IBO = imbinarize(IC,TOtsu); 
+Otsu=uint8(255*TOtsu);   % 8-bits [0,255]
+subplot(2,2,3), imshow(IBO), title("Binaria Otsu. T = "+Otsu)
+
+%segmentação com o valor da mediana
+med = median(IC(:)); %8 bits [0,255]
+Tmed = double(med)/255; %double [0,1]
+IBM = imbinarize(IC,Tmed); 
+subplot(2,2,4), imshow(IBM), title("Binaria mediana. T = "+med)
 
 
 end
-

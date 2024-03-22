@@ -1,0 +1,57 @@
+%API TP2 Ex.H
+%Lara Tibolla Chaves    Entrega: 15/03/2024
+
+%Script: Avaliaçao do desempenho de TLocal - usei o indice de avaliaçao
+
+imgOriginal = imread("Aguia.jpg");
+REF = imread("Aguia.jpg");
+[NL, NC, NB] = size(imgOriginal);
+TOtsu = graythresh(imgOriginal); % calcula o valor T na faixa de 0-1
+Otsu = uint8(255 * TOtsu);
+TDR = zeros(1, 14);
+
+for S = 1:14
+    intersecao_total = zeros(NL, NC);
+    uniao_total = zeros(NL, NC);
+    
+    for L = 1:S
+        for C = 1:S
+            NCb = round(NC/S);
+            NLb = round(NL/S);
+            PC = 1:NCb:(S-1)*NCb+1; % primeira coluna
+            UC = [NCb:NCb:(S-1)*NCb NC]; % última coluna
+            PL = 1:NLb:(S-1)*NLb+1; % primeira linha
+            UL = [NLb:NLb:(S-1)*NLb NL]; % última linha
+            SUB = imgOriginal(PL(L):UL(L), PC(C):UC(C));
+            
+            if std2(SUB) < 10 % atribui um valor de referência. Se a imagem for homogênea
+                if mean2(SUB) > (TOtsu * 255)
+                    SUB = ones(size(SUB, 1), size(SUB, 2)); % se a média for maior que o valor de OTsu, atribui o valor 1
+                    OtsuSUB = graythresh(SUB);
+                else
+                    SUB = zeros(size(SUB, 1), size(SUB, 2)); % se a média for menor que o valor de OTsu, atribui o valor 0
+                    OtsuSUB = graythresh(SUB);
+                end
+            else 
+                OtsuSUB = graythresh(SUB); % se a imagem não for homogênea - usamos o método de Otsu
+            end
+            
+            binaria = imbinarize(SUB, OtsuSUB);
+            BI = binaria;
+                       
+            intersecao = BI & REF(PL(L):UL(L), PC(C):UC(C));  % calcula interseção e união para esta iteração
+            uniao = BI | REF(PL(L):UL(L), PC(C):UC(C));
+            
+            % acumula interseção e união ao longo de todas as iterações
+            intersecao_total(PL(L):UL(L), PC(C):UC(C)) = intersecao_total(PL(L):UL(L), PC(C):UC(C)) + intersecao;
+            uniao_total(PL(L):UL(L), PC(C):UC(C)) = uniao_total(PL(L):UL(L), PC(C):UC(C)) + uniao;
+        end
+    end
+    
+      TDR(S) = sum(intersecao_total(:)) / sum(uniao_total(:));   % calcula TDR para esta escala
+end
+
+plot(1:14, TDR)
+title("Avaliação do Desempenho TLocal")
+xlabel("Valor de S")
+ylabel("True detection rate (TDR)")
